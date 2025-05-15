@@ -1,0 +1,2 @@
+0 nonfight
+1 fight
