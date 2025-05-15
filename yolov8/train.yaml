@@ -1,0 +1,5 @@
+train: /civi/data/hit_children/images
+val: /civi/data/hit_children/images
+
+nc: 1
+names: ['fight']
