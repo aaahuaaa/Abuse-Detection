@@ -1,0 +1,58 @@
+python tools/predict.py --input_file test_hit_segs/ \
+                           --config pptsm_fight_frames_dense.yaml \
+                           --model_file inference/ppTSM/ppTSM.pdmodel \
+                           --params_file inference/ppTSM/ppTSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+
+python main.py --test -c pptsm_fight_frames_dense.yaml \
+   -w output/411ppTSM_finetune_fight_pd_val-on-ours/42ppTSM_finetune_fight_pd_best.pdparams
+
+1. 视频抽帧
+python data/ucf101/extract_rawframes.py dataset/Our-more-clips_two-type rawframes_more/ --level 2 --ext mp4
+
+1.1 新数据集添加至总数据集中
+cp -r /civi/data/ppTSM/rawframes_more/fight/* /civi/data/ppTSM/rawframes/fight/
+
+2.训练集和验证集划分
+python SplitDatasetToList.py
+
+3.训练
+export CUDA_VISIBLE_DEVICES=0,1,2
+python -B -m paddle.distributed.launch --gpus="0,1,2" \
+   --log_dir=log_Full-with-Ours-more  main.py  --validate \
+   -c pptsm_fight_frames_dense.yaml
+
+4.导出模型 (需要改回yaml文件的132行 model_name为 ppTSM)
+python tools/export_model.py -c /civi/data/ppTSM/pptsm_fight_frames_dense.yaml\
+                                -p /civi/data/ppTSM/output/417_ppTSM_finetune_val-on-ours/417_ppTSM_finetune_val-on-ours_best.pdparams\
+                                -o /civi/data/ppTSM/inference/417ppTSM_finetune
+
+5.执行推理 (需要改回utils.py的60行 .ava_predict 为 ava_predict)
+python tools/predict.py --input_file dataset/Our-more-clips_two-type/nofight/nofight_5_1_002.mp4 \
+                           --config pptsm_fight_frames_dense.yaml \
+                           --model_file inference/417ppTSM_finetune/ppTSM.pdmodel \
+                           --params_file inference/417ppTSM_finetune/ppTSM.pdiparams \
+                           --use_gpu=True \
+                           --use_tensorrt=False
+
+6.转onnx
+paddle2onnx \
+--model_dir=./inference/417ppTSM_finetune \
+--model_filename=ppTSM.pdmodel \
+--params_filename=ppTSM.pdiparams \
+--save_file=./inference/417ppTSM_finetune/ppTSM.onnx \
+--opset_version=10 \
+--enable_onnx_checker=True
+
+7.onnx预测推理
+python deploy/paddle2onnx/predict_onnx.py \
+--input_file dataset/Our-more-clips_two-type/nofight/nofight_5_1_002.mp4 \
+--config pptsm_fight_frames_dense.yaml \
+--onnx_file=./inference/417ppTSM_finetune/ppTSM.onnx
+
+8.工程化结合yolo和pptsm用至离线视频(需要改回utils.py的60行 ava_predict 为 .ava_predict)
+python program.py
+
+
+
