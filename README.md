@@ -1,5 +1,6 @@
 # Abuse Detection Project
 ## 数据集
+在[百度网盘](https://pan.baidu.com/s/1lMUZjxLii649VWwd1HdKLg?pwd=1234)中下载，密码：1234 <br>
 - 【公共数据集pp_five_datasets】<br>
   - RWF-2000：最好，最适配，既有室内室外，也有双人多人，可惜小孩的较少<br>
   - CCTV-Fight：来源基本都是TV的新闻报道类，较长，很难用好<br>
@@ -10,6 +11,9 @@
 - 【自制数据集】<br>
   - 网上报道的截图：200张左右<br>
   - 办公室模拟场景：20段视频，抽帧2000张左右<br>
+
+## 模型权重
+在[百度网盘](https://pan.baidu.com/s/1UusJyYP9uLINSWgU8LImlw?pwd=1234)中下载，密码：1234 <br>
 
 ## 模型一：YOLOv8一级检测
 ### 模型训练
